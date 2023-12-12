@@ -1,0 +1,94 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 600px;
+    margin: 100px auto;
+    text-align: center;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    color: #333;
+}
+
+.buttons {
+    margin-top: 20px;
+}
+
+a {
+    display: inline-block;
+    padding: 10px 20px;
+    text-decoration: none;
+    color: #fff;
+    border-radius: 5px;
+    margin: 0 10px;
+    cursor: pointer;
+}
+
+.start-game-btn {
+    background-color: #4CAF50;
+}
+
+.leaderboard-btn {
+    background-color: #3498db;
+}
+
+.create-lobby-btn {
+    background-color: #e74c3c;
+}
+
+.join-lobby-btn {
+    background-color: #2ecc71;
+}
+
+.back-btn {
+    background-color: #3498db;
+    color: #fff;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 20px;
+    display: inline-block;
+}
+
+.create-lobby-btn1 {
+    background-color: #2ecc71;
+    color: #fff;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.create-lobby-btn1:hover {
+    background-color: #27ae60;
+}
+
+.back-btn:hover {
+    background-color: #2980b9;
+}
+
+.join-lobby-btn1 {
+    background-color: #2ecc71;
+    color: #fff;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.join-lobby-btn1:hover {
+    background-color: #27ae60;
+}
+
+
