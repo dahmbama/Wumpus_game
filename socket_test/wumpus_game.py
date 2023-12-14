@@ -14,13 +14,53 @@ class WumpusGame:
         self.players = []   # Should be two
         self.wumpuses = []  # Initialize the list for Wumpuses
         self.pits = []      # Initialize the list for Pits
-    
+
         self.place_players()    # Corners
         self.place_hazards('PIT', 2)  # Assuming 2 pits, should not be adjacent on in corners
         self.place_hazards('W', 2)    # Assuming 2 Wumpuses, should not be adjacent on in corners
         self.place_treasure_equidistant()   # Should be reachable and equidistant by and from both players
         self.game_over = False
         self.winner = None
+
+
+
+    def get_player_pov_game_state(self, player_id):
+        """Return the game state from the perspective of the specified player."""
+        player = next(p for p in self.players if p.player_id == player_id)
+        pov_grid = [['?' for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
+
+        for x in range(GRID_SIZE):
+            for y in range(GRID_SIZE):
+                if (x, y) in player.visited:
+                    # Map the grid content to the specified naming convention
+                    grid_content = self.grid[x][y]
+                    if 'P' in grid_content:
+                        pov_grid[x][y] = 'P'
+                    elif 'T' in grid_content:
+                        pov_grid[x][y] = 'T'
+                    elif 'PIT' in grid_content:
+                        pov_grid[x][y] = 'PIT'
+                    elif 'W' in grid_content:
+                        pov_grid[x][y] = 'W'
+                    else:
+                        pov_grid[x][y] = 'V'  # V for visited
+
+                    # Add adjacent cues
+                    for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+                        nx, ny = x + dx, y + dy
+                        if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
+                            if 'B' in self.grid[nx][ny] and pov_grid[nx][ny] == '?':
+                                pov_grid[nx][ny] = 'B'  # Breeze
+                            elif 'S' in self.grid[nx][ny] and pov_grid[nx][ny] == '?':
+                                pov_grid[nx][ny] = 'S'  # Stench
+
+        return {
+            'pov_grid': pov_grid,
+            'player_data': player.to_dict(),
+            'game_over': self.game_over,
+            'winner': self.winner,
+            'time_left': self.get_time_left()
+        }
 
     def init_grid(self):
         """Initialize an empty grid."""
@@ -92,7 +132,7 @@ class WumpusGame:
         """Return the current game state."""
         return {
             'grid': self.grid,
-            'players': [player.__dict__ for player in self.players],
+            'players': [player.to_dict() for player in self.players],
             'treasure_position': self.treasure_position,
             'wumpuses': self.wumpuses,
             'pits': self.pits,
@@ -100,7 +140,7 @@ class WumpusGame:
             'winner': self.winner,
             'time_left': self.get_time_left()
         }
-    
+
     def random_position(self):
         """Generate a random position within the grid."""
         return random.randint(0, GRID_SIZE - 1), random.randint(0, GRID_SIZE - 1)

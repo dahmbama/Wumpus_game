@@ -40,8 +40,8 @@ def handle_move(data):
         player_id = data['player_id']
         new_position = data['new_position']
         # Handle move logic and emit updates to clients...
-        game.move_player(player_id, new_position)
-        socketio.emit('move_update', {"message": "Move successful", "new_state": game.get_game_state()})
+        game.move_player(player_id, tuple(new_position))
+        socketio.emit('move_update', {"message": "Move successful", "new_state": game.get_player_pov_game_state(player_id)})
     except Exception as e:
         print(str(e))
         socketio.emit('move_error', {"error": str(e)})

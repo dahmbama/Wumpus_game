@@ -3,6 +3,7 @@ class Player:
         self.player_id = player_id
         self.name = name
         self.position = start_position  # tuple (0 <= x < 4, 0 <= y < 4)
+        self.visited = set([start_position])  # Initialize with the starting position
         self.move_count = 0  # used in the leaderboard IF the player won
         self.is_alive = True  # Set to False if fell to a pit or killed
         self.is_spectating = False  # Set to True if fell to a pit or killed, spectate view is activated if true
@@ -12,6 +13,7 @@ class Player:
         if self.is_valid_move(new_position):
             self.position = new_position
             self.move_count += 1
+            self.visited.add(new_position)  # Add the new position to visited set
 
     def is_valid_move(self, new_position):  # Check if within borders
         row, col = new_position
@@ -37,7 +39,7 @@ class Player:
             "environmental_cues": self.environmental_cues
         }
 
-    def __str__(self):  # For logging and Debugging
-        return (f"Player {self.player_id} - {self.name}: Position {self.position}, "
-                f"Moves: {self.move_count}, Alive: {self.is_alive}, "
-                f"Spectating: {self.is_spectating}, Cues: {self.environmental_cues}")
+    def __str__(self):
+         return (f"Player {self.player_id} - {self.name}: Position {self.position}, "
+                    f"Moves: {self.move_count}, Alive: {self.is_alive}, "
+                    f"Spectating: {self.is_spectating}, Cues: {self.environmental_cues}")
