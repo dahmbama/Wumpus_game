@@ -3,12 +3,44 @@
 import random
 from player import Player
 import time
-
+import threading
+import json
 GRID_SIZE = 4   # minimzed from 5*5 as instructed to keep it simple
-
 class WumpusGame:
     TIME_LIMIT = 180  # 3 minutes is the game length, maybe should be shorter 
-    def __init__(self):
+    games = {}  # Dictionary to manage multiple game instances
+    game_locks = {}  # To manage locks for each game for thread safety
+
+    @classmethod
+    def create_new_game(cls, game_id):
+        with threading.Lock():
+            if game_id in cls.games:
+                raise ValueError(f"Game ID {game_id} already exists.")
+            cls.games[game_id] = WumpusGame(game_id)
+            cls.game_locks[game_id] = threading.Lock()
+
+    @classmethod
+    def get_game(cls, game_id):
+        """Retrieve an existing game instance by its ID."""
+        return cls.games.get(game_id)
+
+    def end_game(self):
+        # End game logic
+        self.game_over = True
+        # Additional logic to determine the winner or other end-game scenarios
+        # ...
+        # Cleanup the game
+        WumpusGame.cleanup_game(self.game_id)
+
+    @classmethod
+    def cleanup_game(cls, game_id):
+        # Cleanup logic for a finished game
+        with cls.game_locks[game_id]:
+            del cls.games[game_id]
+            del cls.game_locks[game_id]
+
+    def __init__(self, game_id):
+        self.game_id = game_id
         self.start_time = time.time()
         self.grid = self.init_grid()
         self.players = []   # Should be two
@@ -22,6 +54,12 @@ class WumpusGame:
         self.game_over = False
         self.winner = None
 
+    def add_player(self, player_id, name):
+            with self.game_locks[self.game_id]:
+                if any(p.player_id == player_id for p in self.players):
+                    raise ValueError(f"Player ID {player_id} already exists in game {self.game_id}.")
+                player = Player(player_id, name, start_position=self.random_position())
+                self.players.append(player)
 
 
     def get_player_pov_game_state(self, player_id):
@@ -53,10 +91,9 @@ class WumpusGame:
                                 pov_grid[nx][ny] = 'B'  # Breeze
                             elif 'S' in self.grid[nx][ny] and pov_grid[nx][ny] == '?':
                                 pov_grid[nx][ny] = 'S'  # Stench
-
         return {
             'pov_grid': pov_grid,
-            'player_data': player.to_dict(),
+            'player_data': player.__dict__,
             'game_over': self.game_over,
             'winner': self.winner,
             'time_left': self.get_time_left()
@@ -132,7 +169,7 @@ class WumpusGame:
         """Return the current game state."""
         return {
             'grid': self.grid,
-            'players': [player.to_dict() for player in self.players],
+            'players': [player.__dict__ for player in self.players],
             'treasure_position': self.treasure_position,
             'wumpuses': self.wumpuses,
             'pits': self.pits,
@@ -152,13 +189,14 @@ class WumpusGame:
             return
         player = next((p for p in self.players if p.player_id == player_id), None)
         if player and player.is_valid_move(new_position):
+            
             player.update_position(new_position)
             self.check_interactions(player)
             self.update_cues(player)
 
     def check_interactions(self, player):
         """Check for interactions with treasure, Wumpuses, or pits."""
-        print(player.position)
+        # print(player.position)
         if player.position == self.treasure_position:
             self.game_over = True
             self.winner = player.player_id
@@ -179,7 +217,7 @@ class WumpusGame:
             if pos in self.pits:
                 cues['breeze'] = True
         player.update_environmental_cues(cues)
-        print(self.grid)
+        # print(self.grid)
 
 
     def is_game_over(self):
